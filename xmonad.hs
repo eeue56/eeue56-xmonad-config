@@ -20,7 +20,10 @@ import XMonad.Layout.NoBorders
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
  
-alert = dzenConfig return . show
+
+xK_PowerButton = 152
+
+-- alert = dzenConfig return . show
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
@@ -41,6 +44,8 @@ myBorderWidth   = 1
 -- "windows key" is usually mod4Mask.
 --
 myModMask       = mod1Mask
+altMask         = mod1Mask
+
  
 -- The default number of workspaces (virtual screens) and their names.
 -- By default we use numeric strings, but any string may be used as a
@@ -107,7 +112,17 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
  
     -- Shrink the master area
     , ((modm,               xK_h     ), sendMessage Shrink)
+    , ((modm,               xK_F1     ), spawn "playerctl previous")
+    , ((modm,               xK_F2     ), spawn "playerctl next")
+    , ((modm,               xK_F3     ), spawn "playerctl play-pause")
+    , ((modm,               xK_F6     ), spawn "xbacklight -dec 10")
+    , ((modm,               xK_F7     ), spawn "xbacklight -inc 10")
+    , ((modm,               xK_F8     ), spawn "amixer sset Master toggle")
+    , ((modm,               xK_F9     ), spawn "amixer -c 0 set Master 2-")
+    , ((modm,               xK_F10     ), spawn "amixer -c 0 set Master 2+")
  
+    , ((modm,               xK_PowerButton), spawn "poweroff")
+
     -- Expand the master area
     , ((modm,               xK_l     ), sendMessage Expand)
  
@@ -129,8 +144,13 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- Quit xmonad
     , ((modm .|. shiftMask, xK_q     ), io (exitWith ExitSuccess))
 
-    , ((0, xF86XK_AudioLowerVolume   ), lowerVolume 3 >>= alert)
-    , ((0, xF86XK_AudioRaiseVolume   ), raiseVolume 3 >>= alert)
+    , ((altMask .|. controlMask, xK_t ), spawn "slock")
+
+    , ((0, xF86XK_AudioLowerVolume   ), spawn "amixer -c 0 set Master 2-")
+    , ((0, xF86XK_AudioRaiseVolume   ), spawn "amixer -c 0 set Master 2+")
+    , ((0, xF86XK_Mail               ), spawn "playerctl previous")
+    , ((0, xF86XK_HomePage           ), spawn "playerctl next")
+    , ((0, xF86XK_AudioPlay          ), spawn "playerctl play-pause")
     , ((0, xF86XK_AudioMute          ), toggleMute    >> return())
  
     -- Restart xmonad
@@ -230,8 +250,9 @@ myManageHook = composeAll
     , className =? "stalonetray"    --> doIgnore
     , resource  =? "desktop_window" --> doIgnore
     , resource  =? "kdesktop"       --> doIgnore
-    , resource  =? "chromium"       --> viewShift "2"
+    , resource  =? "Chromium"       --> viewShift "2"
     , resource  =? "sublime_text"   --> viewShift "3"
+    , className =? "Spotify"        --> doShift "4"
     ]
     where viewShift = doF . liftM2 (.) W.greedyView W.shift
 
